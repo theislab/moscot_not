@@ -19,7 +19,7 @@ PathLike = Union[os.PathLike, str]
 _datasets = MappingProxyType(
     {
         "TedSim": (
-            "https://figshare.com/ndownloader/files/38031258",
+            "https://figshare.com/ndownloader/files/38049102",
             (16382, 500),
         ),
         "mosta": (
