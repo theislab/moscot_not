@@ -576,12 +576,17 @@ class NeuralDualSolver:
 
     def to_dual_potentials(self, c: jnp.ndarray) -> DualPotentials:
         """Return the Kantorovich dual potentials from the trained potentials."""
-
         def f(x):
-            return self.state_f.apply_fn({"params": self.state_f.params}, x, *c)
+            if self.conditional:
+                return self.state_f.apply_fn({"params": self.state_f.params}, x, *c)
+            else:
+                return self.state_f.apply_fn({"params": self.state_f.params}, x)
 
         def g(x):
-            return self.state_g.apply_fn({"params": self.state_g.params}, x, *c)
+            if self.conditional:
+                return self.state_g.apply_fn({"params": self.state_g.params}, x, *c)
+            else:
+                return self.state_g.apply_fn({"params": self.state_g.params}, x)
 
         return DualPotentials(f, g, corr=True, cost_fn=costs.SqEuclidean())
 
