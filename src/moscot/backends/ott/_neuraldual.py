@@ -227,7 +227,7 @@ class NeuralDualSolver:
             pretrain_logs = self.pretrain_identity(trainloader.conditions)
 
         train_logs = self.train_neuraldual(trainloader, validloader)
-        res = self.to_dual_potentials()
+        res = self.to_dual_potentials(c=trainloader.conditions)
         logs = pretrain_logs | train_logs
 
         return (res, logs)
@@ -574,14 +574,14 @@ class NeuralDualSolver:
                 penalty += jnp.linalg.norm(jax.nn.relu(-params[key]["kernel"]))
         return penalty
 
-    def to_dual_potentials(self) -> DualPotentials:
+    def to_dual_potentials(self, c: jnp.ndarray) -> DualPotentials:
         """Return the Kantorovich dual potentials from the trained potentials."""
 
         def f(x):
-            return self.state_f.apply_fn({"params": self.state_f.params}, x)
+            return self.state_f.apply_fn({"params": self.state_f.params}, x, *c)
 
         def g(x):
-            return self.state_g.apply_fn({"params": self.state_g.params}, x)
+            return self.state_g.apply_fn({"params": self.state_g.params}, x, *c)
 
         return DualPotentials(f, g, corr=True, cost_fn=costs.SqEuclidean())
 
