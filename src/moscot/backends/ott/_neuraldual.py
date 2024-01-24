@@ -471,9 +471,9 @@ class OTTNeuralDualSolver:
             g_grad_f_src = jax.vmap(lambda x: state_g.apply_fn({"params": params_g}, x, batch["condition"]))(grad_f_src)
             src_dot_grad_f_src = jnp.sum(batch["source"] * grad_f_src, axis=1)
             # compute loss
-            f_tgt = jax.vmap(lambda x: state_g.apply_fn({"params": params_g}, x, batch["condition"]))(batch["target"])
-            loss = jnp.mean(f_tgt - g_grad_f_src)
-            total_loss = jnp.mean(g_grad_f_src - f_tgt - src_dot_grad_f_src)
+            g_tgt = jax.vmap(lambda x: state_g.apply_fn({"params": params_g}, x, batch["condition"]))(batch["target"])
+            loss = jnp.mean(g_tgt - g_grad_f_src)
+            total_loss = jnp.mean(g_grad_f_src - g_tgt - src_dot_grad_f_src)
             # compute wasserstein distance
             dist = 2 * total_loss + jnp.mean(
                 jnp.sum(batch["target"] * batch["target"], axis=1)
@@ -490,14 +490,14 @@ class OTTNeuralDualSolver:
             """Step function for training."""
             # get loss function for f or g
             if to_optimize == "f":
-                grad_fn = jax.value_and_grad(loss_f_fn, argnums=1, has_aux=True)
+                grad_fn = jax.value_and_grad(loss_f_fn, argnums=0, has_aux=True)
                 # compute loss, gradients and metrics
                 (loss, raw_metrics), grads = grad_fn(state_f.params, state_g.params, state_f, state_g, batch)
                 # return updated state and metrics dict
                 metrics = {"loss_f": loss, "penalty": raw_metrics[0]}
                 return state_f.apply_gradients(grads=grads), metrics
             if to_optimize == "g":
-                grad_fn = jax.value_and_grad(loss_g_fn, argnums=0, has_aux=True)
+                grad_fn = jax.value_and_grad(loss_g_fn, argnums=1, has_aux=True)
                 # compute loss, gradients and metrics
                 (loss, raw_metrics), grads = grad_fn(state_f.params, state_g.params, state_f, state_g, batch)
                 # return updated state and metrics dict
@@ -544,12 +544,11 @@ class OTTNeuralDualSolver:
 
     def clip_weights_icnn(self, params: FrozenVariableDict) -> FrozenVariableDict:
         """Clip weights of ICNN."""
-        params = params.unfreeze()
         for key in params:
             if key.startswith("w_zs"):
                 params[key]["kernel"] = jnp.clip(params[key]["kernel"], a_min=0)
 
-        return freeze(params)
+        return params
 
     def penalize_weights_icnn(self, params: FrozenVariableDict) -> float:
         """Penalize weights of ICNN."""
