@@ -243,7 +243,6 @@ class OTTNeuralDualSolver:
         Pre-training statistics.
         """
 
-        @jax.jit
         def pretrain_loss_fn(
             params: jnp.ndarray,  # type: ignore[name-defined]
             data: jnp.ndarray,  # type: ignore[name-defined]
@@ -257,7 +256,7 @@ class OTTNeuralDualSolver:
             # loss is L2 reconstruction of the input
             return ((grad_g_data - data) ** 2).sum(axis=1).mean()  # TODO make nicer
 
-        # @jax.jit
+        @jax.jit
         def pretrain_update(
             state: TrainState, key: jax.random.KeyArray
         ) -> Tuple[jnp.ndarray, TrainState]:  # type:ignore[name-defined]
