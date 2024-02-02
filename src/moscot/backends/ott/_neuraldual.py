@@ -388,33 +388,38 @@ class OTTNeuralDualSolver:
                         valid_logs[f"{pair[0]}_{pair[1]}_{key}"].append(value)  # type:ignore[union-attr]
                         valid_average_meters[key].update(value)
                 # update best model and patience as necessary
-                if self.best_model_metric == "sinkhorn":
-                    total_loss = (
-                        valid_average_meters["sinkhorn_loss_forward"].avg
-                        + valid_average_meters["sinkhorn_loss_inverse"].avg
-                    )
-                else:
-                    try:
-                        total_loss = valid_average_meters[self.best_model_metric].avg
-                    except ValueError:
-                        f"Unknown metric: {self.best_model_metric}."
-                if total_loss < best_loss:
-                    best_loss = total_loss
-                    best_iter_distance = valid_average_meters["neural_dual_dist"].avg
-                    best_params_f = self.state_f.params
-                    best_params_g = self.state_g.params
-                    curr_patience = 0
-                else:
-                    curr_patience += 1
+                if self.best_model_metric is not None:
+                    if self.best_model_metric == "sinkhorn":
+                        total_loss = (
+                            valid_average_meters["sinkhorn_loss_forward"].avg
+                            + valid_average_meters["sinkhorn_loss_inverse"].avg
+                        )
+                    else:
+                        try:
+                            total_loss = valid_average_meters[self.best_model_metric].avg
+                        except ValueError:
+                            f"Unknown metric: {self.best_model_metric}."
+                    if total_loss < best_loss:
+                        best_loss = total_loss
+                        best_iter_distance = valid_average_meters["neural_dual_dist"].avg
+                        best_params_f = self.state_f.params
+                        best_params_g = self.state_g.params
+                        curr_patience = 0
+                    else:
+                        curr_patience += 1
                 for key, average_meter in valid_average_meters.items():
                     valid_logs[f"mean_{key}"].append(average_meter.avg)  # type:ignore[union-attr]
                     average_meter.reset()
             if curr_patience >= self.patience:
                 break
-        self.state_f = self.state_f.replace(params=best_params_f)
-        self.state_g = self.state_g.replace(params=best_params_g)
-        valid_logs["best_loss"] = best_loss
-        valid_logs["predicted_cost"] = None if best_iter_distance is None else float(best_iter_distance)
+        if self.best_model_metric is not None:
+            self.state_f = self.state_f.replace(params=best_params_f)
+            self.state_g = self.state_g.replace(params=best_params_g)
+            valid_logs["best_loss"] = best_loss
+            valid_logs["predicted_cost"] = None if best_iter_distance is None else float(best_iter_distance)
+        else:
+            valid_logs["best_loss"] = None
+            valid_logs["predicted_cost"] = valid_average_meters["neural_dual_dist"].avg
         if self.compute_wasserstein_baseline:
             valid_logs["sinkhorn_dist"] = np.mean(sink_dist)
         return {
