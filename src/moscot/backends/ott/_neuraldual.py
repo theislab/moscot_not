@@ -333,6 +333,7 @@ class OTTNeuralDualSolver:
                     _compute_sinkhorn_divergence(
                         point_cloud_1=valid_batch[pair]["source"],
                         point_cloud_2=valid_batch[pair]["target"],
+                        epsilon=self.valid_eps,
                         **self.valid_sinkhorn_kwargs,
                     )
                 )
