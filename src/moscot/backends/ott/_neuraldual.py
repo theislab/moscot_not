@@ -86,7 +86,7 @@ class OTTNeuralDualSolver:
         Number of iterations (batches) for pretraining with the identity map.
     pretrain_scale
         Variance of Gaussian distribution used for pretraining.
-    valid_sinkhorn_kwargs
+    sinkhorn_kwargs
         Keyword arguments for computing the discrete sinkhorn divergence for assessing model training.
         By default, the same `tau_a`, `tau_b` and `epsilon` are taken as for the inner sampling loop.
     compute_wasserstein_baseline
@@ -150,7 +150,9 @@ class OTTNeuralDualSolver:
         self.pretrain_iters = pretrain_iters
         self.pretrain_scale = pretrain_scale
         self.valid_sinkhorn_kwargs = dict(valid_sinkhorn_kwargs)
-        self.valid_eps = self.valid_sinkhorn_kwargs.pop("epsilon", 1e-2)
+        self.valid_eps = self.valid_sinkhorn_kwargs.pop("epsilon", 10)
+        self.valid_sinkhorn_kwargs["tau_a"] = self.valid_sinkhorn_kwargs.pop("tau_a", self.tau_a)
+        self.valid_sinkhorn_kwargs["tau_b"] = self.valid_sinkhorn_kwargs.pop("tau_b", self.tau_b)
         self.compute_wasserstein_baseline = compute_wasserstein_baseline
         self.key: jax.random.PRNGKeyArray = jax.random.PRNGKey(seed)
 
