@@ -151,7 +151,7 @@ class OTTNeuralDualSolver:
         self.pretrain_scale = pretrain_scale
         self.valid_sinkhorn_kwargs = dict(valid_sinkhorn_kwargs)
         self.valid_eps = self.valid_sinkhorn_kwargs.pop("epsilon", 10)
-        self.valid_sinkhorn_kwargs["scale_cost"] = self.valid_sinkhorn_kwargs.get("scale_cost", 1.0)
+        self.valid_scale_cost = self.valid_sinkhorn_kwargs.pop("scale_cost", 1.0)
         self.compute_wasserstein_baseline = compute_wasserstein_baseline
         self.key: jax.random.PRNGKeyArray = jax.random.PRNGKey(seed)
 
@@ -162,7 +162,7 @@ class OTTNeuralDualSolver:
         self.callback_func = callback_func
         if self.callback_func is None:
             self.callback_func = lambda tgt, src, pred_tgt, pred_src: _compute_metrics_sinkhorn(
-                tgt, src, pred_tgt, pred_src, self.valid_eps, self.valid_sinkhorn_kwargs
+                tgt, src, pred_tgt, pred_src, self.valid_eps, self.valid_scale_cost, self.valid_sinkhorn_kwargs
             )
         # set optimizer and networks
         self.setup(self.neural_f, self.neural_g, self.optimizer_f, self.optimizer_g)
@@ -333,6 +333,7 @@ class OTTNeuralDualSolver:
                         point_cloud_1=valid_batch[pair]["source"],
                         point_cloud_2=valid_batch[pair]["target"],
                         epsilon=self.valid_eps,
+                        scale_cost=self.valid_scale_cost,
                         **self.valid_sinkhorn_kwargs,
                     )
                 )

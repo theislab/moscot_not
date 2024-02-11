@@ -289,6 +289,7 @@ def _compute_metrics_sinkhorn(
     pred_tgt: jnp.ndarray,
     pred_src: jnp.ndarray,
     valid_eps: float,
+    valid_scale_cost: ScaleCost_t,
     valid_sinkhorn_kwargs: Mapping[str, Any],
 ) -> Dict[str, float]:
     sinkhorn_loss_data = sinkhorn_divergence(
@@ -296,6 +297,7 @@ def _compute_metrics_sinkhorn(
         x=tgt,
         y=src,
         epsilon=valid_eps,
+        scale_cost=valid_scale_cost,
         sinkhorn_kwargs=valid_sinkhorn_kwargs,
     ).divergence
     sinkhorn_loss_forward = sinkhorn_divergence(
@@ -303,6 +305,7 @@ def _compute_metrics_sinkhorn(
         x=tgt,
         y=pred_tgt,
         epsilon=valid_eps,
+        scale_cost=valid_scale_cost,
         sinkhorn_kwargs=valid_sinkhorn_kwargs,
     ).divergence
     sinkhorn_loss_inverse = sinkhorn_divergence(
@@ -310,6 +313,7 @@ def _compute_metrics_sinkhorn(
         x=src,
         y=pred_src,
         epsilon=valid_eps,
+        scale_cost=valid_scale_cost,
         sinkhorn_kwargs=valid_sinkhorn_kwargs,
     ).divergence
     return {
