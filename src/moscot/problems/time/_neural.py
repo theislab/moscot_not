@@ -140,9 +140,7 @@ class TemporalNeuralProblem(
         pos_weights: bool = False,
         dim_hidden: Iterable[int] = (64, 64, 64, 64),
         beta: float = 1.0,
-        best_model_metric: Literal[
-            "sinkhorn_forward", "sinkhorn"
-        ] = "sinkhorn_forward",  # TODO(@MUCDK) include only backward sinkhorn
+        best_model_metric: str = "sinkhorn",
         iterations: int = 25000,  # TODO(@MUCDK): rename to max_iterations
         inner_iters: int = 10,
         valid_freq: int = 50,
