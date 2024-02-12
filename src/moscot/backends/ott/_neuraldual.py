@@ -117,7 +117,7 @@ class OTTNeuralDualSolver:
         f: Union[Dict[str, Any], ICNN] = MappingProxyType({}),
         g: Union[Dict[str, Any], ICNN] = MappingProxyType({}),
         beta: float = 1.0,
-        best_model_metric: str = None,
+        best_model_metric: str = "sinkhorn",
         iterations: int = 25000,  # TODO(@MUCDK): rename to max_iterations
         inner_iters: int = 10,
         valid_freq: int = 250,
@@ -152,6 +152,8 @@ class OTTNeuralDualSolver:
         self.valid_sinkhorn_kwargs = dict(valid_sinkhorn_kwargs)
         self.valid_eps = self.valid_sinkhorn_kwargs.pop("epsilon", 10)
         self.valid_scale_cost = self.valid_sinkhorn_kwargs.pop("scale_cost", 1.0)
+        self.valid_sinkhorn_kwargs["tau_a"] = self.valid_sinkhorn_kwargs.get("tau_a", self.tau_a)
+        self.valid_sinkhorn_kwargs["tau_b"] = self.valid_sinkhorn_kwargs.get("tau_b", self.tau_b)
         self.compute_wasserstein_baseline = compute_wasserstein_baseline
         self.key: jax.random.PRNGKeyArray = jax.random.PRNGKey(seed)
 
