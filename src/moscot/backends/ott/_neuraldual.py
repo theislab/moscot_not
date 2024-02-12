@@ -117,7 +117,7 @@ class OTTNeuralDualSolver:
         f: Union[Dict[str, Any], ICNN] = MappingProxyType({}),
         g: Union[Dict[str, Any], ICNN] = MappingProxyType({}),
         beta: float = 1.0,
-        best_model_metric: str = "sinkhorn_loss_forward",
+        best_model_metric: str = None,
         iterations: int = 25000,  # TODO(@MUCDK): rename to max_iterations
         inner_iters: int = 10,
         valid_freq: int = 250,
@@ -310,7 +310,7 @@ class OTTNeuralDualSolver:
         sink_dist: List[float] = []
         curr_patience: int = 0
         best_loss: float = jnp.inf
-        best_iter_distance: float = 0
+        best_iter_distance: float = jnp.inf
         best_params_f: jnp.ndarray = self.state_f.params
         best_params_g: jnp.ndarray = self.state_g.params  # type:ignore[name-defined]
 
@@ -407,7 +407,7 @@ class OTTNeuralDualSolver:
                             f"Unknown metric: {self.best_model_metric}."
                     if total_loss < best_loss:
                         best_loss = total_loss
-                        best_iter_distance = valid_average_meters["neural_dual_dist"].avg
+                        best_iter_distance = valid_logs["mean_neural_dual_dist"][-1]
                         best_params_f = self.state_f.params
                         best_params_g = self.state_g.params
                         curr_patience = 0
@@ -422,7 +422,7 @@ class OTTNeuralDualSolver:
             valid_logs["predicted_cost"] = float(best_iter_distance)
         else:
             valid_logs["best_loss"] = None
-            valid_logs["predicted_cost"] = valid_average_meters["neural_dual_dist"].avg
+            valid_logs["predicted_cost"] = valid_logs["mean_neural_dual_dist"][-1]
         if self.compute_wasserstein_baseline:
             valid_logs["sinkhorn_dist"] = np.mean(sink_dist)
         return {
