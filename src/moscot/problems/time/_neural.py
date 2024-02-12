@@ -143,8 +143,8 @@ class TemporalNeuralProblem(
         best_model_metric: str = "sinkhorn",
         iterations: int = 25000,  # TODO(@MUCDK): rename to max_iterations
         inner_iters: int = 10,
-        valid_freq: int = 50,
-        log_freq: int = 5,
+        valid_freq: int = 250,
+        log_freq: int = 10,
         patience: int = 100,
         optimizer_f_kwargs: Dict[str, Any] = MappingProxyType({}),
         optimizer_g_kwargs: Dict[str, Any] = MappingProxyType({}),
