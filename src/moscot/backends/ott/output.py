@@ -596,16 +596,11 @@ class NeuralDualOutput(ConvergencePlotterMixin, OTTNeuralOutput):
         return jnp.ones((n,))
 
     def _format_params(self, fmt: Callable[[Any], str]) -> str:
-        if "sinkhorn_dist" in self.training_logs["valid_logs"]:
-            params = {
-                "predicted_cost": round(self.cost, 3),
-                "best_loss": round(self.training_logs["valid_logs"]["best_loss"], 3),  # type: ignore[call-overload]
-                "sinkhorn_dist": round(self.training_logs["valid_logs"]["sinkhorn_dist"], 3),  # type: ignore[call-overload]
-            }
-        else:
-            params = {
-                "predicted_cost": round(self.cost, 3),
-            }
+        params = {
+            "predicted_cost": round(self.cost, 3),
+            "best_loss": round(self.training_logs["valid_logs"]["best_loss"], 3),  # type: ignore[call-overload]
+            "sinkhorn_dist": round(self.training_logs["valid_logs"]["sinkhorn_dist"], 3),  # type: ignore[call-overload]
+        }
         return ", ".join(f"{name}={fmt(val)}" for name, val in params.items())
 
 

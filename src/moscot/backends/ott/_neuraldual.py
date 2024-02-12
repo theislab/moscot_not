@@ -423,8 +423,8 @@ class OTTNeuralDualSolver:
         else:
             valid_logs["best_loss"] = None
             valid_logs["predicted_cost"] = valid_logs["mean_neural_dual_dist"][-1]
-        if self.compute_wasserstein_baseline:
-            valid_logs["sinkhorn_dist"] = np.mean(sink_dist)
+        valid_logs["sinkhorn_dist"] = np.mean(sink_dist) if self.compute_wasserstein_baseline else None
+        
         return {
             "train_logs": train_logs,  # type:ignore[dict-item]
             "valid_logs": valid_logs,
