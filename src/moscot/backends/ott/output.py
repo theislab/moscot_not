@@ -598,8 +598,8 @@ class NeuralDualOutput(ConvergencePlotterMixin, OTTNeuralOutput):
     def _format_params(self, fmt: Callable[[Any], str]) -> str:
         params = {
             "predicted_cost": round(self.cost, 3),
-            "best_loss": round(self.training_logs["valid_logs"]["best_loss"], 3),  # type: ignore[call-overload]
-            "sinkhorn_dist": round(self.training_logs["valid_logs"]["sinkhorn_dist"], 3),  # type: ignore[call-overload]
+            "best_loss": self.training_logs["valid_logs"]["best_loss"],  # type: ignore[call-overload]
+            "sinkhorn_dist": self.training_logs["valid_logs"]["sinkhorn_dist"],  # type: ignore[call-overload]
         }
         return ", ".join(f"{name}={fmt(val)}" for name, val in params.items())
 
