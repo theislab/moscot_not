@@ -128,7 +128,7 @@ class OTTNeuralDualSolver:
         pretrain_iters: int = 15001,
         pretrain_scale: float = 3.0,
         valid_sinkhorn_kwargs: Dict[str, Any] = MappingProxyType({}),
-        compute_wasserstein_baseline: bool = False,
+        compute_wasserstein_baseline: bool = True,
         callback_func: Optional[
             Callable[[jnp.ndarray, jnp.ndarray, jnp.ndarray, jnp.ndarray], Dict[str, float]]
         ] = None,
@@ -310,9 +310,9 @@ class OTTNeuralDualSolver:
         sink_dist: List[float] = []
         curr_patience: int = 0
         best_loss: float = jnp.inf
-        best_iter_distance: float = None
-        best_params_f: jnp.ndarray = None  # type:ignore[name-defined]
-        best_params_g: jnp.ndarray = None  # type:ignore[name-defined]
+        best_iter_distance: float = 0
+        best_params_f: jnp.ndarray = self.state_f.params
+        best_params_g: jnp.ndarray = self.state_g.params  # type:ignore[name-defined]
 
         # define dict to contain source and target batch
         batch: Dict[str, jnp.ndarray] = {}  # type:ignore[name-defined]
@@ -390,16 +390,19 @@ class OTTNeuralDualSolver:
                     for key, value in valid_metrics.items():
                         valid_logs[f"{pair[0]}_{pair[1]}_{key}"].append(value)  # type:ignore[union-attr]
                         valid_average_meters[key].update(value)
+                for key, average_meter in valid_average_meters.items():
+                    valid_logs[f"mean_{key}"].append(average_meter.avg)  # type:ignore[union-attr]
+                    average_meter.reset()
                 # update best model and patience as necessary
                 if self.best_model_metric is not None:
                     if self.best_model_metric == "sinkhorn":
                         total_loss = (
-                            valid_average_meters["sinkhorn_loss_forward"].avg
-                            + valid_average_meters["sinkhorn_loss_inverse"].avg
+                            valid_logs["mean_sinkhorn_loss_forward"][-1]
+                            + valid_logs["mean_sinkhorn_loss_inverse"][-1]
                         )
                     else:
                         try:
-                            total_loss = valid_average_meters[self.best_model_metric].avg
+                            total_loss = valid_logs[f"mean_{self.best_model_metric}"][-1]
                         except ValueError:
                             f"Unknown metric: {self.best_model_metric}."
                     if total_loss < best_loss:
@@ -410,16 +413,13 @@ class OTTNeuralDualSolver:
                         curr_patience = 0
                     else:
                         curr_patience += 1
-                for key, average_meter in valid_average_meters.items():
-                    valid_logs[f"mean_{key}"].append(average_meter.avg)  # type:ignore[union-attr]
-                    average_meter.reset()
             if curr_patience >= self.patience:
                 break
         if self.best_model_metric is not None:
             self.state_f = self.state_f.replace(params=best_params_f)
             self.state_g = self.state_g.replace(params=best_params_g)
             valid_logs["best_loss"] = best_loss
-            valid_logs["predicted_cost"] = None if best_iter_distance is None else float(best_iter_distance)
+            valid_logs["predicted_cost"] = float(best_iter_distance)
         else:
             valid_logs["best_loss"] = None
             valid_logs["predicted_cost"] = valid_average_meters["neural_dual_dist"].avg

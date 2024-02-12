@@ -292,14 +292,6 @@ def _compute_metrics_sinkhorn(
     valid_scale_cost: ScaleCost_t,
     valid_sinkhorn_kwargs: Mapping[str, Any],
 ) -> Dict[str, float]:
-    sinkhorn_loss_data = sinkhorn_divergence(
-        geom=PointCloud,
-        x=tgt,
-        y=src,
-        epsilon=valid_eps,
-        scale_cost=valid_scale_cost,
-        sinkhorn_kwargs=valid_sinkhorn_kwargs,
-    ).divergence
     sinkhorn_loss_forward = sinkhorn_divergence(
         geom=PointCloud,
         x=tgt,
@@ -319,5 +311,4 @@ def _compute_metrics_sinkhorn(
     return {
         "sinkhorn_loss_forward": jnp.abs(sinkhorn_loss_forward),
         "sinkhorn_loss_inverse": jnp.abs(sinkhorn_loss_inverse),
-        "sinkhorn_loss_data": jnp.abs(sinkhorn_loss_data),
     }
