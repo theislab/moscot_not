@@ -152,6 +152,8 @@ class OTTNeuralDualSolver:
         self.valid_sinkhorn_kwargs = dict(valid_sinkhorn_kwargs)
         self.valid_eps = self.valid_sinkhorn_kwargs.pop("epsilon", 10)
         self.valid_scale_cost = self.valid_sinkhorn_kwargs.pop("scale_cost", 1.0)
+        self.valid_sinkhorn_kwargs["tau_a"] = self.valid_sinkhorn_kwargs.get("tau_a", self.tau_a)
+        self.valid_sinkhorn_kwargs["tau_b"] = self.valid_sinkhorn_kwargs.get("tau_b", self.tau_b)
         self.compute_wasserstein_baseline = compute_wasserstein_baseline
         self.key: jax.random.PRNGKeyArray = jax.random.PRNGKey(seed)
 
