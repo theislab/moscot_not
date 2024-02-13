@@ -117,7 +117,7 @@ class OTTNeuralDualSolver:
         f: Union[Dict[str, Any], ICNN] = MappingProxyType({}),
         g: Union[Dict[str, Any], ICNN] = MappingProxyType({}),
         beta: float = 1.0,
-        best_model_metric: str = "sinkhorn",
+        best_model_metric: str = "sinkhorn_loss_forward",
         iterations: int = 25000,  # TODO(@MUCDK): rename to max_iterations
         inner_iters: int = 10,
         valid_freq: int = 250,
