@@ -57,6 +57,8 @@ dependencies = [
     "docrep>=0.3.2",
     "ott-jax==0.4.4",
     "cloudpickle>=2.2.0",
+    "flax>=0.7.5",
+    "optax>=0.1.8",
 ]
 
 [project.optional-dependencies]
