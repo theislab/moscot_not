@@ -20,7 +20,7 @@ It is powered by `OTT <https://ott-jax.readthedocs.io>`_ which is a JAX-based Op
 
 Installation
 ------------
-We recommend first install Jax for GPU support as described in https://jax.readthedocs.io/en/latest/installation.html.
+We recommend first install `jax<=0.4.23` for GPU support as described in https://jax.readthedocs.io/en/latest/installation.html.
 
 Next, in order to install **moscot_not** from source, run::
 
